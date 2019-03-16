@@ -4,7 +4,6 @@
 #Load required packages
 library(LakeMetabolizer)
 library(reshape2)
-source("~/Documents/Research/MFE/database/Current Sensor Database/sensordbTable.R")
 
 #mfeMetab
 # SEJ from CTS CRO, and CJT code

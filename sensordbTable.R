@@ -12,8 +12,8 @@
 # maxDate - character of maximum sample date in standard unambiguous format (i.e. YYYY-MM-DD, YYYY-MM-DD HH:MM, or YYYY-MM-DD HH:MM:SS)
 # dateFormat - character of date format if not in standard unambiguous format (i.e. '%y/%m/%d')
 
-sensordbTable<-function(table,fpath=file.path('C:/Users/ksaunde1/Documents/Sensor Database/FinalSensorDBfiles'),
-                  dbname='MFEsensordb.db',lakeID=c(),minDepth_m=c(),maxDepth_m=c(),
+sensordbTable<-function(table,fpath=dbdir,
+                  dbname=db,lakeID=c(),minDepth_m=c(),maxDepth_m=c(),
                   minDate=c(),maxDate=c(),dateFormat=c()){
   #set file path to the location of the database (defaults to Jake's database location)
   table=as.character(table)
@@ -104,8 +104,8 @@ sensordbTable<-function(table,fpath=file.path('C:/Users/ksaunde1/Documents/Senso
 # fpath - file path of database file location; currently defaults to Jake's computer location
 # dbname - name of database, default is 'MFEdb_20170202.db' ; maybe change to current version so we don't have to continue to update this function
 
-sensordbTableList<-function(fpath=file.path('C:/Users/ksaunde1/Documents/Sensor Database/FinalSensorDBfiles'),
-                      dbname='MFEsensordb.db'){
+sensordbTableList<-function(fpath=dbdir,
+                      dbname=db){
   #set file path to the location of the database (defaults to Jake's database location)
   library(RSQLite)
   drv=SQLite() #create driver object

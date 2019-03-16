@@ -8,11 +8,6 @@
 #***********************
 library(RSQLite)
 
-# let R find the MFE database files by setting the path
-#******************************************************
-dbdir=file.path("C:/Users/ksaunde1/Documents/Regular Database/Current Database/")  # fpath - file path of database file location
-db="MFEdb.db"  # dbname - name of database, default is 'MFEdb.db'
-
 # defining functions for interaction with MFE database
 #*****************************************************
 
