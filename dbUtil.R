@@ -102,6 +102,7 @@ dbTable<-function(table,lakeID=c(),depthClass=c(),fpath=dbdir,dbname=db){
     table[,i] <- as.factor(table[,i])
   } 
   
+  dbDisconnect(con)
   return(table)
 }
 
