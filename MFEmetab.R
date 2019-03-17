@@ -29,7 +29,7 @@ library(reshape2)
 # dirDump       Directory where outputs should be dumped, e.g. 'C:/GLEON/Acton/Results' [NO DEFAULT]
 
 
-mfeMetab<-function(lakeID,minDate,maxDate,outName,dirDump,maxZMix=8,k="cole&caraco",fluxDummyToggle=TRUE,bootstrap='no',lat=46.15,elev=518,windHeight=2,timeStep=10,sensorDepth=0.7){
+mfeMetab<-function(lakeID,minDate,maxDate,outName,dirDump,maxZMix=8,k="cole&caraco",fluxDummyToggle=TRUE,bootstrap='no',lat=46.16,elev=535,windHeight=2,timeStep=10,sensorDepth=0.7){
   ########################################
   #Set up
   setwd(dirDump)
@@ -493,6 +493,7 @@ mfeMetab<-function(lakeID,minDate,maxDate,outName,dirDump,maxZMix=8,k="cole&cara
   metDataEL<-sensordbTable("HOBO_METSTATION_CORR",lakeID="EL",minDate=minDate,maxDate=maxDate)
   metDataWL<-sensordbTable("HOBO_METSTATION_CORR",lakeID="WL",minDate=minDate,maxDate=maxDate)
   metData=rbind(metDataEL,metDataWL)
+  metData=metData[!duplicated(metData$dateTime),]
   #PAR
   #Divide PAR by 1000 to convert from measured units (umol m-2 s-1) to model units (mmol m-2 s-1)
   dataPAR<-aggregate(x=as.numeric(metData$cleanedPAR_uE_m2_s),by=list(metData$dateTime),FUN=mean,na.rm=TRUE)
@@ -583,9 +584,9 @@ mfeMetab<-function(lakeID,minDate,maxDate,outName,dirDump,maxZMix=8,k="cole&cara
   latRad <- lat*degToRad
   sunriseHourAngle <- acos(-tan(latRad)*tan(dec))*radToDeg
   
-  #Sunrise and sunset times (decimal hours, relative to solar time) Iqbal 1983 Ex. 1.5.1 - WHAT TZ IS THIS IN???
-  sunrise <- 12 - sunriseHourAngle/15
-  sunset <- 12 + sunriseHourAngle/15
+  #Sunrise and sunset times (decimal hours, relative to solar time) Iqbal 1983 Ex. 1.5.1 - +5 is to put it in America/Chicago
+  sunrise <- 12 - sunriseHourAngle/15+5
+  sunset <- 12 + sunriseHourAngle/15+5
   # As number of seconds from midnight
   sunrise <- sunrise/24*86400
   sunset <- sunset/24*86400
@@ -614,8 +615,9 @@ mfeMetab<-function(lakeID,minDate,maxDate,outName,dirDump,maxZMix=8,k="cole&cara
   # #Create data.frame with sunrise, sunset times for each day
   # sun <- data.frame(day=daysVec,sunrise,sunset)
   
-  sunrise <- sunrise + 3600
-  sunset <- sunset + 3600
+  #sunrise <- sunrise + 3600
+  #sunset <- sunset + 3600
+  
   
   #Create data.frame with sunrise, sunset times for each day
   sun <- data.frame(day=daysVec,sunrise,sunset)
@@ -633,7 +635,7 @@ mfeMetab<-function(lakeID,minDate,maxDate,outName,dirDump,maxZMix=8,k="cole&cara
   dataWind<- dataWind[dataWind$datetime >= startTrim & dataWind$datetime < endTrim,]
   dataSensorTemp <- dataSensorTemp[dataSensorTemp$datetime >= startTrim & dataSensorTemp$datetime < endTrim,]
   dataTempProfile <- dataTempProfile[dataTempProfile$datetime >= startTrim & dataTempProfile$datetime < endTrim,]
-  completeTimes <- data.frame(datetime=completeTimes[completeTimes$datetime >= startTrim & completeTimes$datetime < endTrim,])
+  completeTimes <- data.frame(datetime=completeTimes[completeTimes$datetime >= startTrim & completeTimes$datetime < endTrim,],stringsAsFactors=FALSE)
   
   #(Useful later) Vector giving which solar day each time in completeTimes belongs to
   solarDaysBreaks <- sun$sunrise[sun$sunrise <= endTrim]
@@ -862,7 +864,7 @@ mfeMetab<-function(lakeID,minDate,maxDate,outName,dirDump,maxZMix=8,k="cole&cara
   
   #Set up data.frame to store output of optimizations
   nDays <- dim(sun)[1] - 1  #Not sure if this indexing works appropriately for all lakes
-  dateRange <- c(sun$day[1],sun$day[nDays])
+  dateRange <- sun$day[c(1,nDays)]
   outDays <- seq(dateRange[1],dateRange[2],"1 day")
   optimOut <- data.frame(solarDay=outDays,nll=rep(NA,nDays), iotaEst=rep(NA,nDays), 
                          rhoEst=rep(NA,nDays), DOInitEst=rep(NA,nDays), optimCode=rep(NA,nDays),
@@ -997,33 +999,30 @@ mfeMetab<-function(lakeID,minDate,maxDate,outName,dirDump,maxZMix=8,k="cole&cara
   iotaNewUnits <- optimOut$iotaEst/(60*60*24) #(mg L-1 s-1) / (mmol m-2 s-1)
   #Aggregate solarFlux - sum by day
   aggSolarFlux <- aggregate(solarFlux,by=list(solarDay=solarDaysVec),sum,na.rm=T)
-  aggSolarFlux$solarDay <- as.POSIXct(trunc.POSIXt(as.POSIXct(aggSolarFlux$solarDay),"days"))
-  aggSolarFlux <- merge(aggSolarFlux,data.frame(solarDay=optimOut$solarDay),all.y=T)
+  aggSolarFlux$solarDay <- as.POSIXct(trunc.POSIXt(as.POSIXct(aggSolarFlux$solarDay,tz="America/Chicago"),"days"),tz="America/Chicago")
+  aggSolarFlux <- merge(aggSolarFlux,data.frame(solarDay=optimOut$solarDay,stringsAsFactors=FALSE),all.y=T)
   totalSolarFlux <- aggSolarFlux[,2] #mmol m-2 d-1
   
   #Calc GPP from fitted iota
   GPPFit <- iotaNewUnits*totalSolarFlux #mg L-1 d-1
   
-  GPPFitOut <- data.frame(solarDay=optimOut$solarDay,GPPFit)
+  GPPFitOut <- data.frame(solarDay=optimOut$solarDay,GPPFit,stringsAsFactors=FALSE)
 
-  dataZMix[,1] <- strftime(strptime(dataZMix[,1],"%Y-%m-%d %H:%M:%S"),format="%Y-%m-%d") #First, convert datetime into just dates (metabolism is calculated as a daily rate)
+  maxZmix<-aggregate(dataZMix[,2],by=list(strftime(strptime(dataZMix[,1],"%Y-%m-%d %H:%M:%S"),format="%Y-%m-%d")),FUN=max,na.rm=TRUE) #applies the 'mean()' function to Zmix data by the given date - i.e. averages all Zmix data for a given date and stores in aveZmix 
   
-  maxZmix<-aggregate(dataZMix[,2],by=list(dataZMix[,1]),FUN=max) #applies the 'mean()' function to Zmix data by the given date - i.e. averages all Zmix data for a given date and stores in aveZmix 
-  
-  maxZmix<-na.omit(maxZmix)                #get rid of NA's 
   colnames(maxZmix)<-c("solarDay","zMix")  #make column headers standard for merging later on 
   
   colnames(GPPFitOut)<-c("solarDay","GPP") #make column headers standard 
-  GPPFitOut<-na.omit(GPPFitOut)
   GPPFitOut[,1]<-as.character(GPPFitOut[,1])
   
   GPPFitOut<-merge(GPPFitOut,maxZmix,by.x="solarDay",all=T) #merges the two data vectors of metabolism and Zmix by given date. i.e. matches up data based on date
-  GPPFitOut<-na.omit(GPPFitOut) #get rid of NA's. Now Zmix and metabolism data are matched up. 
   
   write.table(GPPFitOut,paste(outName,"GPPFitOut.txt"))  
   
-  return(list(optimOut=optimOut,GPPFit=GPPFitOut))
+  optimOut=optimOut[as.character(optimOut$solarDay)%in%GPPFitOut$solarDay,]
+  GPPFitOut=GPPFitOut[GPPFitOut$solarDay%in%as.character(optimOut$solarDay),]
   
+  return(list(optimOut=optimOut,GPPFit=GPPFitOut))
 }
 
 
