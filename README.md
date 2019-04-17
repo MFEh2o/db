@@ -11,13 +11,12 @@ To use any of these scripts in your own analysis script, you'll need to:
 
 4. set the variable db to the name of the database file on your computer [we don't recommend changing this from the name of the file you downloaded]
 
-# let R find the MFE database files by setting the path
-
+#let R find the MFE database files by setting the path
 #******************************************************
 
 dbdir=file.path("C:/Users/ksaunde1/Documents/Regular Database/Current Database/")
 
-db="MFEdb.db"  # dbname - name of database, default is 'MFEdb.db'
+db="MFEdb.db"  
 
 5. source the script name
 
