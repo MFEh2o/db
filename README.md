@@ -15,7 +15,8 @@ To use any of these scripts in your own analysis script, you'll need to:
 
 #******************************************************
 
-dbdir=file.path("C:/Users/ksaunde1/Documents/Regular Database/Current Database/$
+dbdir=file.path("C:/Users/ksaunde1/Documents/Regular Database/Current Database/")
+
 db="MFEdb.db"  # dbname - name of database, default is 'MFEdb.db'
 
 5. source the script name
