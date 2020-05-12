@@ -19,6 +19,11 @@ dbdir=file.path("C:/Users/ksaunde1/Documents/Regular Database/Current Database/"
 
 db="MFEdb.db"  
 
+sensor_dbdir=file.path"C:/Users/ksaunde1/Documents/Sensor Database/Current Database/")
+
+sensor_db="MFEsensordb.db"
+
+
 5. source the script name
 
 
