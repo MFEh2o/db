@@ -12,8 +12,8 @@
 # maxDate - character of maximum sample date in standard unambiguous format (i.e. YYYY-MM-DD, YYYY-MM-DD HH:MM, or YYYY-MM-DD HH:MM:SS)
 # dateFormat - character of date format if not in standard unambiguous format (i.e. '%y/%m/%d')
 
-sensordbTable<-function(table,fpath=dbdir,
-                  dbname=db,lakeID=c(),minDepth_m=c(),maxDepth_m=c(),
+sensordbTable<-function(table,fpath=sensor_dbdir,
+                        dbname=sensor_db,lakeID=c(),minDepth_m=c(),maxDepth_m=c(),
                   minDate=c(),maxDate=c(),dateFormat=c()){
   #set file path to the location of the database (defaults to Jake's database location)
   table=as.character(table)
