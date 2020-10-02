@@ -7,6 +7,7 @@
 # load required packages
 #***********************
 library(RSQLite)
+library(dplyr)
 
 # defining functions for interaction with MFE database
 #*****************************************************
@@ -40,7 +41,7 @@ dbTableSummary<-function(table,cols=c("lakeID","depthClass"),fpath=dbdir,dbname=
   }
   for(i in which(colnames(table) %in% dateTimeFix)) {
     table[,i] <- as.POSIXct(table[,i],tz="America/Chicago")
-  }  
+  }
   for(i in which(colnames(table) %in% numericFix)) {
     table[,i] <- as.numeric(table[,i])
   }  
@@ -101,6 +102,11 @@ dbTable<-function(table,lakeID=c(),depthClass=c(),fpath=dbdir,dbname=db){
   for(i in which(colnames(table) %in% factorFix)) {
     table[,i] <- as.factor(table[,i])
   } 
+  
+  ### Fix NA strings
+  table <- table %>% #change "" and "NA" to actual NA (written as <NA> in character/factor vectors to distinguish from "NA")
+    mutate_if(is.character, list(~na_if(., ""))) %>% # 
+    mutate_if(is.character, list(~na_if(., "NA")))
   
   dbDisconnect(con)
   return(table)
