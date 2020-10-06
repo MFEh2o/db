@@ -25,7 +25,7 @@ getrows <- function(tablename, column, value, con){
 # Note: as written, this function can only take one metadataID at a time. Will try to re-write it later to take more than one. 
 getData <- function(column, value, dbdir = dbdir, dbname = db){
   drv <- dbDriver("SQLite") # have to do this in a separate command instead of just passing in drv = "SQLite" to dbConnect, for some reason. Otherwise it throws an error. Some info in the comments here: https://stackoverflow.com/questions/36943201/what-does-this-mean-unable-to-find-an-inherited-method-for-function-a-for-sig
-  con <- dbConnect(drv = drv, dbname = paste0(dbdir, dbname)) # connect to the database
+  con <- dbConnect(drv = drv, dbname = paste0(dbdir, "/", dbname)) # connect to the database
   
   tableNames <- dbTableList(fpath = dbdir, dbname = dbname) # list the database table names
 
