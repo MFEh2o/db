@@ -4,8 +4,6 @@ library(tidyverse)
 library(RSQLite)
 source("dbUtil.R")
 
-
-
 # Basic logic of this function: first, we connect to the database and list out all the names of the tables contained in it. Then, for each table in that list, we look through its column names to see if they contain `metadataID`. If they do, we filter that table to get rows associated with the metadataID(s) in question. Then we store those in a list.
 
 # Helper function: get rows from a specified table with the specified metadataID(s)
@@ -16,16 +14,18 @@ getrows <- function(tablename, column, value, con){
     query <- sprintf("SELECT * FROM '%s' WHERE sampleID = '%s'", tablename, value)
   }else if(column == "projectID"){
     query <- sprintf("SELECT * FROM '%s' WHERE projectID = '%s'", tablename, value)
+  }else if(column == "lakeID"){
+    query <- sprintf("SELECT * FROM '%s' WHERE lakeID = '%s'", tablename, value)
   }else{
-    stop("Right now, this function can only handle 'metadataID', 'sampleID', and 'projectID' as column types.")
+    stop("Right now, this function can only handle 'metadataID', 'sampleID', lakeID, and 'projectID' as column types.")
   }
   rows <- dbGetQuery(con, query)
 }
 
 # Note: as written, this function can only take one metadataID at a time. Will try to re-write it later to take more than one. 
-getData <- function(column, value, dbdir = "./", dbname = "MFEdb.db"){
+getData <- function(column, value, dbdir = dbdir, dbname = db){
   drv <- dbDriver("SQLite") # have to do this in a separate command instead of just passing in drv = "SQLite" to dbConnect, for some reason. Otherwise it throws an error. Some info in the comments here: https://stackoverflow.com/questions/36943201/what-does-this-mean-unable-to-find-an-inherited-method-for-function-a-for-sig
-  con <- dbConnect(drv = drv, dbname = "MFEdb.db") # connect to the database
+  con <- dbConnect(drv = drv, dbname = paste0(dbdir, dbname)) # connect to the database
   
   tableNames <- dbTableList(fpath = dbdir, dbname = dbname) # list the database table names
 
