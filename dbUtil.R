@@ -87,7 +87,7 @@ dbTable<-function(table,lakeID=c(),depthClass=c(),fpath=dbdir,dbname=db){
   }
   
   for(i in which(colnames(table) %in% dateTimeFix)) {
-    table[,i] <- as.POSIXct(table[,i],tz="America/Chicago")
+    table[,i] <- as.POSIXct(table[,i],tz="America/Chicago",optional=TRUE)
   }  
   
   for(i in which(colnames(table) %in% numericFix)) {
